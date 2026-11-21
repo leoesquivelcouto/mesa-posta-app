@@ -1,0 +1,38 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Equipe · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<div class="duas-colunas">
+  <section class="cartao">
+    <h2>Quem trabalha no evento</h2>
+    <ul class="lista-membros">
+      {% for pessoa, papel in membros %}
+      <li>
+        <span><strong>{{ pessoa.nome }}</strong>{% if pessoa.id == a.usuario.id %} <small class="sutil">(você)</small>{% endif %}<br><small class="sutil">{{ pessoa.email }}</small></span>
+        <span class="etiqueta">{{ PAPEL_NOME[papel] }}</span>
+        <form method="post" action="/eventos/{{ e.id }}/equipe/{{ pessoa.id }}/remover" data-confirmar="Remover {{ pessoa.nome }} da equipe?">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><button class="link perigo-texto">remover</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="cartao">
+    <h2>Adicionar pessoa</h2>
+    <p class="sutil">A pessoa precisa ter uma conta no Mesa Posta. Peça para ela se cadastrar e informe o mesmo e-mail aqui.
+      Para mudar o papel de alguém, adicione o e-mail de novo com o papel novo.</p>
+    <form method="post" action="/eventos/{{ e.id }}/equipe" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>E-mail da conta <input type="email" name="email" required></label>
+      <label>Papel
+        <select name="papel">
+          <option value="noivos">Noivos: convidados e mesas</option>
+          <option value="recepcao">Recepção: consulta e check-in na entrada</option>
+          <option value="cerimonial">Cerimonial: tudo, inclusive convites e equipe</option>
+        </select>
+      </label>
+      <button class="botao">Adicionar</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

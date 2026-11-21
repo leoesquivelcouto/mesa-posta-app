@@ -1,0 +1,28 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Configurações · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<div class="duas-colunas">
+  <section class="cartao">
+    <h2>Dados do evento</h2>
+    <form method="post" action="/eventos/{{ e.id }}/configuracoes" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Nome <input name="nome" value="{{ e.nome }}" required minlength="2" maxlength="120"></label>
+      <label>Data <input type="date" name="data" value="{{ e.data.isoformat() }}" required></label>
+      <label>Local <input name="local" value="{{ e.local or '' }}" maxlength="200"></label>
+      <label>Confirmar presença até <input type="date" name="prazo" value="{{ prazo.isoformat() if prazo else '' }}">
+        <small>Vale até 23h59 desse dia (horário de Brasília). Vazio: sem prazo.</small></label>
+      <button class="botao">Salvar</button>
+    </form>
+  </section>
+  <section class="cartao perigo">
+    <h2>Excluir evento</h2>
+    <p>Apaga o evento, os convidados, as mesas e os convites. Não dá para desfazer.</p>
+    <form method="post" action="/eventos/{{ e.id }}/excluir" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Para confirmar, digite o nome do evento <input name="confirmacao" autocomplete="off" placeholder="{{ e.nome }}"></label>
+      <button class="botao perigo">Excluir evento</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

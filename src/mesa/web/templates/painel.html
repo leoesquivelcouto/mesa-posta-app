@@ -1,0 +1,53 @@
+{% extends "evento_base.html" %}
+{% block evento %}
+{% set e = a.evento %}
+<section class="numeros-grade">
+  <div class="numero"><strong>{{ r.convidados }}</strong><span>convidados</span></div>
+  <div class="numero ok"><strong>{{ r.confirmados }}</strong><span>confirmados</span></div>
+  <div class="numero"><strong>{{ r.pendentes }}</strong><span>sem resposta</span></div>
+  <div class="numero recusa"><strong>{{ r.recusados }}</strong><span>não vão</span></div>
+  <div class="numero"><strong>{{ r.sentados }}<small>/{{ r.lugares }}</small></strong><span>lugares ocupados</span></div>
+  <div class="numero destaque"><strong>{{ r.presentes }}</strong><span>já chegaram</span></div>
+</section>
+
+{% if r.convidados %}
+<div class="barra grande" aria-label="Respostas">
+  <span class="ok" style="width: {{ r.confirmados / r.convidados * 100 }}%"></span><span class="recusa" style="width: {{ r.recusados / r.convidados * 100 }}%"></span>
+</div>
+<p class="legenda"><span class="ponto ok"></span>confirmados <span class="ponto recusa"></span>não vão <span class="ponto"></span>sem resposta</p>
+{% endif %}
+
+{% if r.confirmados_sem_mesa %}
+<p class="aviso-inline alerta">{{ r.confirmados_sem_mesa }} confirmado(s) ainda sem mesa. <a href="/eventos/{{ e.id }}/mesas">Distribuir agora</a></p>
+{% endif %}
+
+{% if a.papel != 'recepcao' %}
+<section class="cartao">
+  <h2>Passo a passo</h2>
+  <ol class="checklist">
+    <li class="{{ 'feito' if r.convidados }}"><strong>Monte a lista de convidados.</strong>
+      {% if r.convidados %}{{ r.convidados }} na lista.{% else %}Importe a planilha ou adicione um por um.{% endif %}
+      <a href="/eventos/{{ e.id }}/convidados">Convidados</a></li>
+    <li class="{{ 'feito' if mesas }}"><strong>Crie as mesas.</strong>
+      {% if mesas %}{{ mesas }} mesa(s), {{ r.lugares }} lugares.{% else %}Dá para criar várias de uma vez.{% endif %}
+      <a href="/eventos/{{ e.id }}/mesas">Mesas</a></li>
+    {% if a.papel == 'cerimonial' %}
+    <li class="{{ 'feito' if r.convidados and com_convite >= r.convidados }}"><strong>Envie os convites.</strong>
+      {{ com_convite }} de {{ r.convidados }} com link de confirmação.
+      <a href="/eventos/{{ e.id }}/convites">Convites</a></li>
+    {% endif %}
+    <li class="{{ 'feito' if r.convidados and not r.confirmados_sem_mesa and r.confirmados }}"><strong>Distribua os confirmados.</strong>
+      {{ r.sentados }} sentado(s).
+      <a href="/eventos/{{ e.id }}/mesas">Mesas</a></li>
+    <li><strong>No dia, abra a Recepção no celular.</strong> A câmera lê o QR code de cada convidado.
+      <a href="/eventos/{{ e.id }}/recepcao">Recepção</a></li>
+  </ol>
+  {% if e.prazo_rsvp %}<p class="sutil">Prazo para confirmar: {{ e.prazo_rsvp | hora_br }}.</p>{% endif %}
+</section>
+{% else %}
+<section class="cartao">
+  <h2>No dia do evento</h2>
+  <p>Abra a <a href="/eventos/{{ e.id }}/recepcao">Recepção</a> no celular para ler o QR code dos convidados ou buscar pelo nome.</p>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block classe_main %}inicio{% endblock %}
+{% block conteudo %}
+<section class="heroi">
+  <p class="sobretitulo">Para cerimoniais de casamento</p>
+  <h1>A lista de convidados, as mesas e a entrada da festa num lugar só.</h1>
+  <p class="lead">Importe a planilha, mande um link de confirmação para cada convidado, distribua as mesas sem
+    estourar a capacidade e faça o check-in pelo QR code na porta.</p>
+  <div class="botoes">
+    <a class="botao" href="/cadastro">Criar conta grátis</a>
+    <a class="botao secundario" href="/entrar">Entrar</a>
+  </div>
+</section>
+
+<section class="passos">
+  <article><span>1</span><h2>Convidados</h2><p>Importe a planilha do Excel ou do Google Planilhas. Erros aparecem linha por linha, antes de gravar.</p></article>
+  <article><span>2</span><h2>Confirmação</h2><p>Cada convidado recebe um link único pelo WhatsApp e confirma pelo celular, sem precisar de conta.</p></article>
+  <article><span>3</span><h2>Mesas</h2><p>Distribua os confirmados. A capacidade de cada mesa é garantida, mesmo com várias pessoas editando.</p></article>
+  <article><span>4</span><h2>Recepção</h2><p>Na entrada, a câmera lê o QR code do convidado e mostra a mesa. O mesmo convite não entra duas vezes.</p></article>
+</section>
+{% endblock %}

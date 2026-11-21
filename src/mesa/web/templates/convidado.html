@@ -1,0 +1,66 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}{{ c.nome }} · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<p><a href="/eventos/{{ e.id }}/convidados">← Voltar para a lista</a></p>
+<div class="duas-colunas">
+  <section class="cartao">
+    <h2>{{ c.nome }}</h2>
+    <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Nome <input name="nome" value="{{ c.nome }}" required minlength="2" maxlength="120"></label>
+      <label>Celular (WhatsApp) <input name="telefone" value="{{ c.telefone | telefone }}" inputmode="tel"></label>
+      <label>E-mail <input type="email" name="email" value="{{ c.email or '' }}"></label>
+      <label>Grupo <input name="grupo" value="{{ c.grupo or '' }}" maxlength="80"></label>
+      <label>Resposta
+        <select name="resposta">
+          {% for v, r in [("pendente", "Sem resposta"), ("confirmado", "Confirmado"), ("recusado", "Não vai")] %}
+          <option value="{{ v }}" {{ 'selected' if c.resposta == v }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+        <small>Use quando o convidado responder por telefone. "Não vai" tira a pessoa da mesa.</small>
+      </label>
+      <label>Restrição alimentar <input name="restricao_alimentar" value="{{ c.restricao_alimentar or '' }}" maxlength="200"></label>
+      <button class="botao">Salvar</button>
+    </form>
+  </section>
+
+  <div class="pilha">
+    <section class="cartao">
+      <h2>Mesa</h2>
+      {% if c.resposta == 'recusado' %}
+      <p class="sutil">Quem não vai não ocupa lugar.</p>
+      {% else %}
+      <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}/mesa" class="linha-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="voltar" value="/eventos/{{ e.id }}/convidados/{{ c.id }}">
+        <select name="mesa_id" aria-label="Mesa">
+          <option value="">Sem mesa</option>
+          {% for id, nome in mesas %}<option value="{{ id }}" {{ 'selected' if c.mesa_id == id }}>{{ nome }}</option>{% endfor %}
+        </select>
+        <button class="botao secundario">Salvar mesa</button>
+      </form>
+      {% endif %}
+    </section>
+
+    {% if a.papel == 'cerimonial' %}
+    <section class="cartao">
+      <h2>Link de confirmação</h2>
+      <p class="sutil">{% if c.tem_convite %}Já tem link. Gerar um novo invalida o anterior (útil se o link foi perdido ou repassado).{% else %}Ainda não tem link.{% endif %}</p>
+      <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}/convite">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="botao secundario">{{ 'Gerar novo link' if c.tem_convite else 'Gerar link' }}</button>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="cartao perigo">
+      <h2>Excluir</h2>
+      <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}/excluir" data-confirmar="Excluir {{ c.nome }} da lista?">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="botao perigo">Excluir convidado</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

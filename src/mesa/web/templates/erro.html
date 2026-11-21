@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · Mesa Posta{% endblock %}
+{% block classe_main %}estreito{% endblock %}
+{% block conteudo %}
+<div class="cartao centro">
+  <h1>{{ titulo }}</h1>
+  <p>{{ mensagem }}</p>
+  <p><a class="botao secundario" href="{{ '/eventos' if usuario else '/' }}">Voltar ao início</a></p>
+</div>
+{% endblock %}

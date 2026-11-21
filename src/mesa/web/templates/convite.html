@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titulo %}{{ evento.nome }}{% endblock %}
+{% block classe_body %}pagina-convite{% endblock %}
+{% block topo %}{% endblock %}
+{% block classe_main %}convite{% endblock %}
+{% block conteudo %}
+<article class="cartao-convite">
+  <p class="sobretitulo">Você está convidado(a)</p>
+  <h1>{{ evento.nome }}</h1>
+  <p class="quando">{{ evento.data | data_br }}{% if evento.local %}<br>{{ evento.local }}{% endif %}</p>
+  <hr>
+  <p class="saudacao">Olá, <strong>{{ c.nome }}</strong>!</p>
+
+  {% if c.resposta == 'confirmado' %}
+    <p class="estado ok">Presença confirmada ✓</p>
+    {% if mesa %}<p class="mesa-convidado">Sua mesa: <strong>{{ mesa.nome }}</strong></p>{% endif %}
+    <figure class="qr">
+      <img src="/c/{{ token }}/qr.svg" alt="QR code de entrada de {{ c.nome }}" width="240" height="240">
+      <figcaption>Mostre este QR code na entrada.<br>Dica: tire um print desta tela.</figcaption>
+    </figure>
+    {% if c.restricao_alimentar %}<p class="sutil">Restrição alimentar informada: {{ c.restricao_alimentar }}</p>{% endif %}
+  {% elif c.resposta == 'recusado' %}
+    <p class="estado recusa">Você avisou que não vai poder ir.</p>
+  {% else %}
+    <p>Você vai?</p>
+  {% endif %}
+
+  {% if encerrado %}
+    <p class="aviso-inline alerta">O prazo para responder terminou{% if evento.prazo_rsvp %} em {{ evento.prazo_rsvp | hora_br }}{% endif %}. Se precisar mudar algo, fale com o cerimonial.</p>
+  {% else %}
+    <form method="post" action="/c/{{ token }}" class="pilha form-convite">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      {% if c.resposta == 'pendente' %}
+      <label>Restrição alimentar (opcional) <input name="restricao_alimentar" maxlength="200" placeholder="Ex.: vegetariano, sem lactose"></label>
+      <div class="botoes-resposta">
+        <button class="botao grande" name="resposta" value="confirmado">Vou!</button>
+        <button class="botao grande secundario" name="resposta" value="recusado">Não vou poder</button>
+      </div>
+      {% else %}
+      <details>
+        <summary>Mudar minha resposta</summary>
+        <label>Restrição alimentar (opcional) <input name="restricao_alimentar" maxlength="200" value="{{ c.restricao_alimentar or '' }}"></label>
+        <div class="botoes-resposta">
+          {% if c.resposta != 'confirmado' %}<button class="botao" name="resposta" value="confirmado">Vou</button>{% endif %}
+          {% if c.resposta == 'confirmado' %}<button class="botao secundario" name="resposta" value="confirmado">Atualizar restrição</button>{% endif %}
+          {% if c.resposta != 'recusado' %}<button class="botao secundario" name="resposta" value="recusado">Não vou poder</button>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% if evento.prazo_rsvp %}<p class="sutil">Responda até {{ evento.prazo_rsvp | hora_br }}.</p>{% endif %}
+    </form>
+  {% endif %}
+</article>
+<p class="assinatura">Convite enviado pelo cerimonial com o Mesa Posta.<br>Este link é pessoal: não compartilhe.</p>
+{% endblock %}

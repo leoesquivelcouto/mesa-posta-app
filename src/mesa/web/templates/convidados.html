@@ -1,0 +1,73 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Convidados · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}{% set pode_editar = a.papel in ('cerimonial', 'noivos') %}
+{% set nomes_filtro = {"todos": "Todos", "confirmados": "Confirmados", "pendentes": "Sem resposta", "recusados": "Não vão", "sem_mesa": "Sem mesa", "presentes": "Já chegaram"} %}
+
+<form class="barra-busca" method="get">
+  <input type="search" name="busca" value="{{ busca }}" placeholder="Buscar pelo nome" aria-label="Buscar pelo nome">
+  <select name="filtro" aria-label="Filtrar" onchange="this.form.submit()">
+    {% for chave, rotulo in nomes_filtro.items() %}<option value="{{ chave }}" {{ 'selected' if filtro == chave }}>{{ rotulo }}</option>{% endfor %}
+  </select>
+  <button class="botao secundario">Buscar</button>
+</form>
+<p class="sutil">{{ total }} convidado(s){% if busca or filtro != 'todos' %} encontrados · <a href="?">limpar filtros</a>{% endif %}</p>
+
+{% if lista %}
+<div class="tabela-rolagem">
+<table class="tabela">
+  <thead><tr><th>Nome</th><th>Contato</th><th>Resposta</th><th>Mesa</th>{% if pode_editar %}<th></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for c in lista %}
+  <tr>
+    <td><strong>{{ c.nome }}</strong>{% if c.grupo %}<br><small class="sutil">{{ c.grupo }}</small>{% endif %}
+      {% if c.restricao_alimentar %}<br><small class="restricao">🍽 {{ c.restricao_alimentar }}</small>{% endif %}</td>
+    <td>{{ c.telefone | telefone }}{% if c.email %}<br><small class="sutil">{{ c.email }}</small>{% endif %}</td>
+    <td><span class="status s-{{ c.resposta }}">{{ {"confirmado": "Confirmado", "pendente": "Sem resposta", "recusado": "Não vai"}[c.resposta] }}</span>
+      {% if c.checkin_em %}<br><small class="ok-texto">chegou {{ c.checkin_em | hora_br }}</small>{% endif %}</td>
+    <td>{{ mesas.get(c.mesa_id, "—") }}</td>
+    {% if pode_editar %}<td class="acoes"><a class="botao pequeno secundario" href="/eventos/{{ e.id }}/convidados/{{ c.id }}">Editar</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if paginas > 1 %}
+<nav class="paginacao" aria-label="Páginas">
+  {% for n in range(1, paginas + 1) %}
+  <a href="?busca={{ busca | urlencode }}&filtro={{ filtro }}&pagina={{ n }}" {% if n == pagina_n %}aria-current="page"{% endif %}>{{ n }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+{% elif not busca and filtro == 'todos' %}
+<div class="vazio"><h2>A lista está vazia</h2><p>Importe a planilha ou adicione o primeiro convidado abaixo.</p></div>
+{% endif %}
+
+{% if pode_editar %}
+<div class="duas-colunas">
+  <section class="cartao">
+    <h2>Adicionar convidado</h2>
+    <form method="post" action="/eventos/{{ e.id }}/convidados" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Nome <input name="nome" required minlength="2" maxlength="120"></label>
+      <label>Celular (WhatsApp) <input name="telefone" inputmode="tel" placeholder="(61) 99999-0000"></label>
+      <label>E-mail <input type="email" name="email"></label>
+      <label>Grupo <input name="grupo" maxlength="80" placeholder="Ex.: Família da noiva, Amigos do trabalho"></label>
+      <button class="botao">Adicionar</button>
+    </form>
+  </section>
+  <section class="cartao">
+    <h2>Importar planilha</h2>
+    <p class="sutil">No Excel ou no Google Planilhas, salve como <strong>CSV</strong>. Colunas aceitas: <code>nome</code>
+      (obrigatória), <code>telefone</code>, <code>email</code> e <code>grupo</code>. Se alguma linha tiver erro, nada é
+      gravado e o aviso diz qual linha corrigir. Quem já estiver na lista é ignorado.</p>
+    <form method="post" action="/eventos/{{ e.id }}/convidados/importar" enctype="multipart/form-data" class="pilha">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="file" name="arquivo" accept=".csv,text/csv" required aria-label="Arquivo CSV">
+      <button class="botao">Importar</button>
+    </form>
+    <p><a href="/eventos/{{ e.id }}/convidados/modelo.csv">Baixar planilha modelo</a></p>
+  </section>
+</div>
+{% endif %}
+{% endblock %}

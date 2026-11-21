@@ -1,0 +1,93 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Mesas · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}{% set pode_editar = a.papel in ('cerimonial', 'noivos') %}
+{% set voltar = "/eventos/" ~ e.id ~ "/mesas" %}
+
+{% if pode_editar and sem_mesa %}
+<section class="cartao destaque-cartao">
+  <h2>Sem mesa ({{ sem_mesa | length }})</h2>
+  <p class="sutil">Escolha a mesa e clique em Sentar. Mesas cheias não aparecem na lista.</p>
+  <ul class="lista-sentar">
+    {% for c in sem_mesa %}
+    <li>
+      <span><strong>{{ c.nome }}</strong>
+        <span class="status s-{{ c.resposta }}">{{ "Confirmado" if c.resposta == "confirmado" else "Sem resposta" }}</span>
+        {% if c.grupo %}<small class="sutil">{{ c.grupo }}</small>{% endif %}</span>
+      <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}/mesa" class="linha-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="voltar" value="{{ voltar }}">
+        <select name="mesa_id" aria-label="Mesa para {{ c.nome }}" required>
+          <option value="">Mesa...</option>
+          {% for m in lista_mesas if sentados[m.id] | length < m.capacidade %}
+          <option value="{{ m.id }}">{{ m.nome }} ({{ m.capacidade - sentados[m.id] | length }} livres)</option>
+          {% endfor %}
+        </select>
+        <button class="botao pequeno">Sentar</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if lista_mesas %}
+<div class="grade-mesas">
+  {% for m in lista_mesas %}
+  {% set ocupados = sentados[m.id] | length %}
+  <article class="mesa {{ 'cheia' if ocupados >= m.capacidade }}">
+    <header>
+      <h3>{{ m.nome }}</h3>
+      <span class="lugares">{{ ocupados }}/{{ m.capacidade }}</span>
+    </header>
+    <div class="barra"><span style="width: {{ ocupados / m.capacidade * 100 }}%"></span></div>
+    <ul>
+      {% for c in sentados[m.id] %}
+      <li>
+        <span>{{ c.nome }}{% if c.resposta != 'confirmado' %} <small class="sutil">(sem resposta)</small>{% endif %}{% if c.checkin_em %} <small class="ok-texto">✓</small>{% endif %}</span>
+        {% if pode_editar %}
+        <form method="post" action="/eventos/{{ e.id }}/convidados/{{ c.id }}/mesa">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="voltar" value="{{ voltar }}">
+          <input type="hidden" name="mesa_id" value="">
+          <button class="link sutil" title="Tirar {{ c.nome }} da mesa" aria-label="Tirar {{ c.nome }} da mesa">tirar</button>
+        </form>
+        {% endif %}
+      </li>
+      {% else %}
+      <li class="sutil">Mesa vazia</li>
+      {% endfor %}
+    </ul>
+    {% if pode_editar %}
+    <details class="editar-mesa">
+      <summary>Editar mesa</summary>
+      <form method="post" action="/eventos/{{ e.id }}/mesas/{{ m.id }}" class="pilha">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <label>Nome <input name="nome" value="{{ m.nome }}" required maxlength="60"></label>
+        <label>Lugares <input type="number" name="capacidade" value="{{ m.capacidade }}" min="1" max="50" required></label>
+        <button class="botao pequeno secundario">Salvar</button>
+      </form>
+      <form method="post" action="/eventos/{{ e.id }}/mesas/{{ m.id }}/excluir" data-confirmar="Excluir {{ m.nome }}? Os convidados dela ficam sem mesa.">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="link perigo-texto">Excluir mesa</button>
+      </form>
+    </details>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="vazio"><h2>Nenhuma mesa ainda</h2><p>Crie as mesas abaixo. Dá para criar todas de uma vez.</p></div>
+{% endif %}
+
+{% if pode_editar %}
+<section class="cartao">
+  <h2>Criar mesas</h2>
+  <form method="post" action="/eventos/{{ e.id }}/mesas" class="grade-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Quantas mesas <input type="number" name="quantidade" value="1" min="1" max="60"></label>
+    <label>Lugares em cada <input type="number" name="capacidade" value="8" min="1" max="50" required></label>
+    <label class="largo">Nome <input name="nome" maxlength="60" placeholder="Opcional (ex.: Mesa dos noivos). Vazio: Mesa 1, Mesa 2..."></label>
+    <div class="largo"><button class="botao">Criar</button></div>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

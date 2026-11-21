@@ -1,0 +1,45 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Convites · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<section class="cartao">
+  <h2>Links de confirmação</h2>
+  <p>Cada convidado recebe um link só dele para confirmar presença pelo celular, sem precisar de conta. Depois de
+    confirmar, a mesma página mostra o QR code de entrada.</p>
+  <p class="sutil">Por segurança, o link aparece <strong>só uma vez</strong>, logo depois de gerado: copie, envie pelo
+    WhatsApp ou baixe a planilha na próxima tela. O sistema guarda apenas uma impressão digital do link (hash), então
+    nem quem tiver acesso ao banco consegue recuperá-lo. Se alguém perder o link, gere um novo na página do convidado.</p>
+
+  {% if lista %}
+  <div class="botoes">
+    <form method="post" action="/eventos/{{ e.id }}/convites">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="modo" value="novos">
+      <button class="botao" {{ 'disabled' if not sem_convite }}>Gerar links para quem ainda não tem ({{ sem_convite }})</button>
+    </form>
+    <form method="post" action="/eventos/{{ e.id }}/convites" data-confirmar="Gerar links novos para TODOS? Os links enviados antes deixam de funcionar.">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="modo" value="todos">
+      <button class="botao secundario">Gerar de novo para todos</button>
+    </form>
+  </div>
+  {% else %}
+  <p><a href="/eventos/{{ e.id }}/convidados">Adicione convidados</a> para gerar os convites.</p>
+  {% endif %}
+</section>
+
+{% if lista %}
+<div class="tabela-rolagem">
+<table class="tabela">
+  <thead><tr><th>Convidado</th><th>Link</th><th>Resposta</th></tr></thead>
+  <tbody>
+  {% for c in lista %}
+  <tr>
+    <td><a href="/eventos/{{ e.id }}/convidados/{{ c.id }}">{{ c.nome }}</a></td>
+    <td>{% if c.tem_convite %}<span class="ok-texto">gerado</span>{% else %}<span class="sutil">ainda não</span>{% endif %}</td>
+    <td><span class="status s-{{ c.resposta }}">{{ {"confirmado": "Confirmado", "pendente": "Sem resposta", "recusado": "Não vai"}[c.resposta] }}</span></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

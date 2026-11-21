@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}{% block titulo_pagina %}{% endblock %}{{ a.evento.nome }} · Mesa Posta{% endblock %}
+{% block conteudo %}
+{% set e = a.evento %}
+<div class="cabecalho-evento">
+  <div>
+    <p class="sobretitulo">{{ e.data | data_br }}{% if e.local %} · {{ e.local }}{% endif %}</p>
+    <h1>{{ e.nome }}</h1>
+  </div>
+  <span class="etiqueta">{{ PAPEL_NOME[a.papel] }}</span>
+</div>
+
+<nav class="abas" aria-label="Seções do evento">
+  {% set itens = [("painel", "", "Painel", ("cerimonial", "noivos", "recepcao")),
+                  ("convidados", "/convidados", "Convidados", ("cerimonial", "noivos", "recepcao")),
+                  ("mesas", "/mesas", "Mesas", ("cerimonial", "noivos", "recepcao")),
+                  ("convites", "/convites", "Convites", ("cerimonial",)),
+                  ("recepcao", "/recepcao", "Recepção", ("cerimonial", "noivos", "recepcao")),
+                  ("equipe", "/equipe", "Equipe", ("cerimonial",)),
+                  ("configuracoes", "/configuracoes", "Configurações", ("cerimonial",))] %}
+  {% for chave, caminho, rotulo, papeis in itens if a.papel in papeis %}
+  <a href="/eventos/{{ e.id }}{{ caminho }}" {% if aba == chave %}aria-current="page"{% endif %}>{{ rotulo }}</a>
+  {% endfor %}
+</nav>
+
+{% block evento %}{% endblock %}
+{% endblock %}

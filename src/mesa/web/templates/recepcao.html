@@ -1,0 +1,63 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Recepção · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<section class="numeros-grade compacto">
+  <div class="numero destaque"><strong>{{ r.presentes }}</strong><span>já chegaram</span></div>
+  <div class="numero ok"><strong>{{ r.confirmados }}</strong><span>confirmados</span></div>
+</section>
+
+<div class="duas-colunas">
+  <section class="cartao leitor">
+    <h2>Ler QR code</h2>
+    <div class="camera" data-leitor data-acao="/eventos/{{ e.id }}/recepcao/codigo">
+      <video playsinline muted aria-label="Imagem da câmera"></video>
+      <canvas hidden></canvas>
+      <p class="camera-estado" aria-live="polite">Toque em "Abrir câmera" e aponte para o QR code do convidado.</p>
+    </div>
+    <div class="botoes">
+      <button type="button" class="botao" data-abrir-camera>Abrir câmera</button>
+    </div>
+    <form method="post" action="/eventos/{{ e.id }}/recepcao/codigo" class="linha-form" data-form-codigo>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input name="codigo" placeholder="Ou cole o link do convite" aria-label="Link do convite" required minlength="10">
+      <button class="botao secundario">Entrar</button>
+    </form>
+  </section>
+
+  <section class="cartao">
+    <h2>Buscar pelo nome</h2>
+    <form method="get" class="linha-form">
+      <input type="search" name="busca" value="{{ busca }}" placeholder="Nome do convidado" aria-label="Nome do convidado">
+      <button class="botao secundario">Buscar</button>
+    </form>
+    {% if busca and not encontrados %}<p class="sutil">Ninguém com esse nome na lista.</p>{% endif %}
+    <ul class="lista-checkin">
+      {% for c in encontrados %}
+      <li>
+        <span><strong>{{ c.nome }}</strong><br>
+          <small class="sutil">{{ mesas.get(c.mesa_id, "sem mesa") }} ·
+          {{ {"confirmado": "confirmado", "pendente": "não respondeu", "recusado": "tinha recusado"}[c.resposta] }}</small></span>
+        {% if c.checkin_em %}
+        <span class="ok-texto">chegou {{ c.checkin_em | hora_br }}</span>
+        {% else %}
+        <form method="post" action="/eventos/{{ e.id }}/recepcao/{{ c.id }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><button class="botao pequeno">Check-in</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% if recentes %}
+    <h3>Últimas entradas</h3>
+    <ul class="lista-simples">
+      {% for c in recentes %}<li>{{ c.checkin_em | hora_br }} · {{ c.nome }} <span class="sutil">({{ mesas.get(c.mesa_id, "sem mesa") }})</span></li>{% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/jsQR.js?v=1.4.0" defer></script>
+<script src="/static/leitor.js?v=1" defer></script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "evento_base.html" %}
+{% block titulo_pagina %}Links gerados · {% endblock %}
+{% block evento %}
+{% set e = a.evento %}
+<section class="cartao destaque-cartao">
+  <h2>{{ itens | length }} link(s) gerado(s)</h2>
+  <p><strong>Copie ou envie agora:</strong> por segurança, estes links não aparecem de novo depois que você sair desta página.</p>
+  <div class="botoes">
+    <button type="button" class="botao" data-baixar-csv="#tabela-links" data-nome="convites-{{ e.nome | lower | replace(' ', '-') }}.csv">Baixar planilha com os links</button>
+    <a class="botao secundario" href="/eventos/{{ e.id }}/convites">Concluir</a>
+  </div>
+</section>
+
+<div class="tabela-rolagem">
+<table class="tabela" id="tabela-links">
+  <thead><tr><th>Nome</th><th>Telefone</th><th>Link</th><th></th></tr></thead>
+  <tbody>
+  {% for i in itens %}
+  <tr>
+    <td>{{ i.nome }}</td>
+    <td>{{ i.telefone | telefone }}</td>
+    <td><input class="link-convite" value="{{ i.link }}" readonly aria-label="Link de {{ i.nome }}" onclick="this.select()"></td>
+    <td class="acoes">
+      <button type="button" class="botao pequeno secundario" data-copiar="{{ i.link }}">Copiar</button>
+      {% if i.whatsapp %}<a class="botao pequeno whatsapp" href="{{ i.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

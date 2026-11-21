@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Meus eventos · Mesa Posta{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <h1>Meus eventos</h1>
+</div>
+
+{% if linhas %}
+<div class="grade-eventos">
+  {% for evento, papel in linhas %}
+  {% set total = contagem.get(evento.id, 0) %}{% set conf = confirmados.get(evento.id, 0) %}
+  <a class="cartao-evento" href="/eventos/{{ evento.id }}">
+    <span class="etiqueta">{{ PAPEL_NOME[papel] }}</span>
+    <h2>{{ evento.nome }}</h2>
+    <p class="sutil">{{ evento.data | data_br }}{% if evento.local %} · {{ evento.local }}{% endif %}</p>
+    {% if evento.data < hoje %}<p class="sutil">Evento já realizado</p>{% endif %}
+    <div class="barra" aria-label="{{ conf }} de {{ total }} confirmados"><span style="width: {{ (conf / total * 100) if total else 0 }}%"></span></div>
+    <p class="numeros"><strong>{{ conf }}</strong> de {{ total }} confirmados</p>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="vazio">
+  <h2>Nenhum evento ainda</h2>
+  <p>Crie o primeiro abaixo. Se você é dos noivos ou da recepção, peça para o cerimonial adicionar o seu e-mail
+    (<strong>{{ usuario.email }}</strong>) na equipe do evento.</p>
+</div>
+{% endif %}
+
+<section class="cartao">
+  <h2>Novo evento</h2>
+  <form method="post" action="/eventos" class="grade-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="largo">Nome do evento <input name="nome" required minlength="2" maxlength="120" placeholder="Casamento de Ana e Pedro"></label>
+    <label>Data <input type="date" name="data" required></label>
+    <label>Confirmar presença até <input type="date" name="prazo"><small>Opcional. Depois disso, o link não aceita respostas.</small></label>
+    <label class="largo">Local <input name="local" maxlength="200" placeholder="Opcional"></label>
+    <div class="largo"><button class="botao">Criar evento</button></div>
+  </form>
+</section>
+{% endblock %}
