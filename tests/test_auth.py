@@ -54,4 +54,4 @@ def test_sem_token_token_invalido_e_token_adulterado(client, nova_conta):
 
 
 def test_saude(client):
-    assert client.get("/saude").json()["status"] == "ok"
+    assert client.get("http://testserver/saude").json()["status"] == "ok"

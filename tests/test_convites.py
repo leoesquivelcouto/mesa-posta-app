@@ -129,5 +129,5 @@ def test_token_nao_aparece_no_log(client, cerimonial, evento, convidado, caplog)
     token = _token(_gerar(client, cerimonial, evento).json()[0])
     with caplog.at_level("INFO", logger="mesa"):
         client.get(f"/convite/{token}")
-    assert "GET /convite/*** 200" in caplog.text
+    assert "GET /api/convite/*** 200" in caplog.text
     assert token not in caplog.text

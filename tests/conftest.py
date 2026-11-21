@@ -44,7 +44,8 @@ def banco_limpo():
 
 @pytest.fixture
 def client() -> TestClient:
-    return TestClient(app)
+    """Cliente da API JSON (tudo sob /api)."""
+    return TestClient(app, base_url="http://testserver/api")
 
 
 @pytest.fixture
