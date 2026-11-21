@@ -9,3 +9,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# saídas locais (logs do servidor, links de demonstração)
+/logs/
