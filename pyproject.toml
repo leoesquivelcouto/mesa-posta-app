@@ -1,7 +1,7 @@
 [project]
-name = "mesa-posta"
-version = "0.1.0"
-description = "Convidados, confirmação de presença, mesas e check-in para cerimonial de casamentos."
+name = "mesa-posta-app"
+version = "1.0.0"
+description = "Mesa Posta, aplicativo completo: convidados, confirmação de presença, mesas e check-in por QR code para cerimonial de casamentos."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
@@ -17,6 +17,8 @@ dependencies = [
     "python-multipart>=0.0.9",
     "pydantic[email]>=2.7",
     "segno>=1.6",
+    "jinja2>=3.1",
+    "tzdata>=2024.1",
 ]
 
 [project.optional-dependencies]

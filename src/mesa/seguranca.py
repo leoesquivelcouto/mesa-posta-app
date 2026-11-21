@@ -31,10 +31,11 @@ def confere_senha(senha: str, senha_hash: str) -> bool:
 HASH_FALSO = hash_senha(secrets.token_hex(16))
 
 
-def criar_jwt(usuario_id: int) -> str:
+def criar_jwt(usuario_id: int, minutos: int | None = None) -> str:
     agora = datetime.now(UTC)
     c = config()
-    dados = {"sub": str(usuario_id), "iat": agora, "exp": agora + timedelta(minutes=c.jwt_minutos)}
+    validade = timedelta(minutes=minutos or c.jwt_minutos)
+    dados = {"sub": str(usuario_id), "iat": agora, "exp": agora + validade}
     return jwt.encode(dados, c.segredo_jwt, algorithm=ALGORITMO)
 
 
